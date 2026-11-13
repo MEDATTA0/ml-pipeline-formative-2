@@ -1,4 +1,4 @@
-# Voice CLI (Beulla only)
+# Voice CLI 
 
 Does not modify face or product code. Teammates call these from the shared CLI when ready.
 
