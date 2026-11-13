@@ -7,7 +7,15 @@ authors = [
     { name = "Ibrahim Maâzou Djahadi", email = "ibrahimdjahadi46@gmail.com" }
 ]
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "joblib>=1.6.0",
+    "librosa>=1.0.1",
+    "pandas>=3.1.1",
+    "scikit-learn==1.9.0",
+    "soundfile>=0.14.0",
+    "torch>=2.15.0",
+    "torchvision>=0.29.2",
+]
 
 [project.scripts]
 formative-2 = "formative_2:main"
