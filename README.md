@@ -13,17 +13,19 @@ Team: **Beulla**, **Ibrahim**, **Kelvin**
 - `customer_social_profiles - customer_social_profiles.csv`
 - `customer_transactions - customer_transactions.csv`
 
+## Setup
+
+From the project root, install the locked dependencies with uv.
+
+```bash
+uv sync --locked
+```
 
 ## Face and product CLI
 
-From the project root, run these commands in your Python environment. Install
-`torch torchvision` for the face command and `pandas joblib scikit-learn==1.6.1`
-for the saved product model.
-
 ```bash
-export PYTHONPATH=src
-python -m formative_2.face.predict_face "data/images/Kelvin Aaron-Onuigbo.jpg.jpeg" --crop .15 .11 .87 .88
-python -m formative_2.product.predict_product 151
+uv run --locked python -m formative_2.face.predict_face "data/images/Kelvin Aaron-Onuigbo.jpg.jpeg" --crop .15 .11 .87 .88
+uv run --locked python -m formative_2.product.predict_product 151
 ```
 
 Pass a cropped face or use `--crop` with the left, top, right, and bottom
@@ -33,25 +35,21 @@ member for the classroom demo. The product command builds features from
 
 ## Transaction demo
 
-From the project root, install the runtime dependencies and run the three models
-together. Use scikit-learn 1.9.0 for the saved voice model. Loading the older
-product model may print a scikit-learn version warning.
+Run all three models together from the project root. The saved product model
+may print a scikit-learn version warning when it loads.
 
 ```bash
-python -m pip install torch torchvision librosa soundfile pandas joblib scikit-learn==1.9.0
-export PYTHONPATH=src
-
 face="data/images/Kelvin Aaron-Onuigbo.jpg.jpeg"
 crop=(.15 .11 .87 .88)
 
 # Approved transaction
-python -m formative_2 kelvin "$face" data/audio/raw/kelvin_yes_approve.wav --crop "${crop[@]}"
+uv run --locked formative-2 kelvin "$face" data/audio/raw/kelvin_yes_approve.wav --crop "${crop[@]}"
 
 # Denied at the face check
-python -m formative_2 beulla "$face" data/audio/raw/beulla_yes_approve.wav --crop "${crop[@]}"
+uv run --locked formative-2 beulla "$face" data/audio/raw/beulla_yes_approve.wav --crop "${crop[@]}"
 
 # Denied at the voice check
-python -m formative_2 kelvin "$face" data/audio/raw/beulla_yes_approve.wav --crop "${crop[@]}"
+uv run --locked formative-2 kelvin "$face" data/audio/raw/beulla_yes_approve.wav --crop "${crop[@]}"
 ```
 
 The demo links Kelvin, Beulla, and Ibrahim to sample customer IDs 151, 192,
