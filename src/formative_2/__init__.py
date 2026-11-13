@@ -1,2 +1,4 @@
 def main() -> None:
-    print("Hello from formative-2!")
+    from .transaction import main as run_transaction_cli
+
+    run_transaction_cli()
