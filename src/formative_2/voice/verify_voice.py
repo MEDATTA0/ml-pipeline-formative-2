@@ -21,23 +21,40 @@ ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_MODEL = ROOT / "models" / "voice_verifier.joblib"
 
 
-def verify(wav_path: Path, model_path: Path = DEFAULT_MODEL, threshold: float = 0.5) -> int:
-    if not model_path.exists():
-        print(f"Missing model: {model_path}", file=sys.stderr)
-        print("Train via Colab or: python -m formative_2.voice.train_voice_model", file=sys.stderr)
-        return 2
+def predict_speaker(wav_path: Path, model_path: Path = DEFAULT_MODEL) -> tuple[str, float]:
+    if not wav_path.is_file():
+        raise FileNotFoundError(f"Missing audio: {wav_path}")
 
     bundle = joblib.load(model_path)
     clf = bundle["model"]
     le = bundle["label_encoder"]
 
     y, sr = load_audio(wav_path, sr=SAMPLE_RATE)
+    if y.size == 0 or not np.isfinite(y).all() or not np.any(y):
+        raise ValueError("Expected a non-silent audio recording.")
     feats = extract_features(y, sr)
     row = np.array([[feats[c] for c in feature_column_names()]])
+    if not np.isfinite(row).all():
+        raise ValueError("Audio produced invalid voice features.")
     proba = clf.predict_proba(row)[0]
     best_idx = int(np.argmax(proba))
-    member = le.classes_[best_idx]
+    member = str(le.inverse_transform([clf.classes_[best_idx]])[0])
     confidence = float(proba[best_idx])
+
+    return member, confidence
+
+
+def verify(wav_path: Path, model_path: Path = DEFAULT_MODEL, threshold: float = 0.5) -> int:
+    if not model_path.exists():
+        print(f"Missing model: {model_path}", file=sys.stderr)
+        print("Train via Colab or: python -m formative_2.voice.train_voice_model", file=sys.stderr)
+        return 2
+
+    try:
+        member, confidence = predict_speaker(wav_path, model_path)
+    except (OSError, ValueError, RuntimeError) as error:
+        print(f"Cannot verify voice: {error}", file=sys.stderr)
+        return 2
 
     print(f"Predicted member: {member} (confidence={confidence:.3f})")
     if confidence >= threshold:
